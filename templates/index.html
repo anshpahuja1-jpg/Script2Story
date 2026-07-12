@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script2Story — AI Storyboard Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        h1 span {
+            color: #e50914;
+        }
+
+        .tagline {
+            font-size: 0.9rem;
+            color: #888;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 60px;
+        }
+
+        .upload-box {
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 60px 40px;
+            background: #111;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .upload-box:hover {
+            border-color: #e50914;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .upload-box p {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .upload-box .file-name {
+            color: #e50914;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            min-height: 20px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 16px;
+            background: #e50914;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .generate-btn:hover {
+            background: #b20710;
+        }
+
+        .generate-btn:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 30px;
+            color: #888;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 2px;
+            background: #222;
+            margin-top: 12px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #e50914;
+            width: 0%;
+            animation: progress 30s linear forwards;
+        }
+
+        @keyframes progress {
+            0% {
+                width: 0%;
+            }
+
+            90% {
+                width: 85%;
+            }
+
+            100% {
+                width: 90%;
+            }
+        }
+
+        .format-note {
+            margin-top: 30px;
+            font-size: 0.75rem;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .format-note code {
+            color: #888;
+            background: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>SCRIPT<span>2</span>STORY</h1>
+        <p class="tagline">AI Storyboard Generator</p>
+
+        <form id="uploadForm" action="/generate" method="POST" enctype="multipart/form-data">
+            <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">🎬</div>
+                <p>Click to upload your screenplay</p>
+                <p>.txt format only</p>
+                <div class="file-name" id="fileName">No file selected</div>
+            </div>
+
+            <input type="file" id="fileInput" name="script" accept=".txt" onchange="updateFileName(this)">
+
+            <button type="submit" class="generate-btn" id="generateBtn" disabled>
+                Generate Storyboard
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <p>Generating your storyboard — this takes 2-3 minutes</p>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="format-note">
+            <p>Format your screenplay with scene headings like:</p>
+            <p><code>INT. COFFEE SHOP - DAY</code> or <code>EXT. CITY STREET - NIGHT</code></p>
+            <p>Separate scenes with a blank line.</p>
+        </div>
+    </div>
+
+    <script>
+        function updateFileName(input) {
+            const fileName = input.files[0]?.name || 'No file selected';
+            document.getElementById('fileName').textContent = fileName;
+            document.getElementById('generateBtn').disabled = !input.files[0];
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function () {
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('generateBtn').textContent = 'Generating...';
+        });
+    </script>
+</body>
+
+</html>
