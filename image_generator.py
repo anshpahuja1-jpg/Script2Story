@@ -7,16 +7,39 @@ import textwrap
 import os
 
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN", "")
+
 def build_prompt(scene):
     shot_descriptions = {
-        "CLOSE-UP": "extreme close-up shot, face filling frame, shallow depth of field, bokeh background, 50mm lens",
-        "WIDE SHOT": "wide angle establishing shot, vast environment, small human figure, 24mm lens, sweeping vista",
-        "TRACKING SHOT": "dynamic tracking shot, motion blur, following subject, handheld camera feel, cinematic movement",
-        "MEDIUM SHOT": "medium shot, waist up framing, rule of thirds, natural headroom, 35mm lens",
-        "ESTABLISHING SHOT": "establishing shot, full environment visible, architectural detail, location context, 28mm lens",
-        "OVER-THE-SHOULDER": "over the shoulder shot, foreground subject blurred, focus on background subject, depth",
+        # Basic shots
+        "CLOSE-UP": "close-up shot, face filling frame, shallow depth of field, bokeh background, 50mm lens, emotional intimacy",
+        "EXTREME CLOSE-UP": "extreme close-up shot, single detail filling entire frame, macro lens, intense emphasis, 100mm macro lens",
+        "MEDIUM SHOT": "medium shot, waist up framing, rule of thirds, natural headroom, 35mm lens, balanced composition",
+        "WIDE SHOT": "wide angle shot, full subject visible with environment, 24mm lens, sense of scale and location",
+        "EXTREME WIDE SHOT": "extreme wide shot, tiny subject in vast environment, 16mm lens, sweeping landscape, isolation",
+
+        # Angle shots
+        "LOW ANGLE SHOT": "low angle shot, camera looking up at subject, subject feels powerful and dominant, dramatic perspective, 28mm lens",
+        "HIGH ANGLE SHOT": "high angle shot, camera looking down at subject, subject feels small and vulnerable, overhead perspective",
+        "BIRD'S EYE VIEW": "bird's eye view, straight overhead shot, top down perspective, reveals layout and scale, drone shot aesthetic",
+        "WORM'S EYE VIEW": "worm's eye view, extreme low angle, camera on ground looking up, subject feels towering and dominant, ultra wide lens",
+        "EYE LEVEL SHOT": "eye level shot, camera at subject's eye height, natural balanced perspective, neutral emotional tone, 35mm lens",
+
+        # Movement and technique
+        "TRACKING SHOT": "tracking shot, camera following subject in motion, subtle motion blur, dynamic movement, cinematic dolly",
+        "OVER-THE-SHOULDER": "over the shoulder shot, foreground figure blurred, focus on background subject, dialogue framing, depth",
+        "POV SHOT": "point of view shot, camera becomes character's eyes, first person perspective, immersive, handheld feel",
+        "DUTCH ANGLE": "dutch tilt shot, camera tilted 15 degrees, psychological tension, unease and disorientation, thriller aesthetic",
+
+        # Establishing
+        "ESTABLISHING SHOT": "establishing shot, full environment visible, architectural detail, sets location and context, 28mm lens",
+        "REACTION SHOT": "reaction shot, character's emotional response, subtle facial expression, 85mm portrait lens, shallow focus",
     }
-    shot_detail = shot_descriptions.get(scene['shot_type'], "cinematic shot, 35mm lens")
+
+    shot_detail = shot_descriptions.get(
+        scene['shot_type'],
+        "cinematic shot, 35mm lens, professional cinematography"
+    )
+
     prompt = (
         f"{shot_detail}, "
         f"cinematic color grading, "
@@ -24,7 +47,8 @@ def build_prompt(scene):
         f"{scene['description']}, "
         f"professional film cinematography, anamorphic lens flare, "
         f"dramatic chiaroscuro lighting, deep shadows, film grain, "
-        f"movie still, high budget production, 4k, photorealistic"
+        f"movie still, high budget production, 4k, photorealistic, "
+        f"shot on 35mm film, Kodak Vision3"
     )
     return prompt
 
@@ -45,7 +69,9 @@ def fetch_image(prompt, retries=3):
                         "prompt": prompt,
                         "width": 1024,
                         "height": 576,
-                        "num_outputs": 1
+                        "num_outputs": 1,
+                        "num_inference_steps": 28,
+                        "guidance_scale": 3.5
                     }
                 },
                 timeout=180
@@ -70,6 +96,9 @@ def fetch_image(prompt, retries=3):
             else:
                 print(f"    Error {response.status_code}: {response.text[:150]}")
                 time.sleep(5)
+        except requests.exceptions.Timeout:
+            print(f"    Timed out. Retrying...")
+            time.sleep(5)
         except Exception as e:
             print(f"    Exception: {e}")
             time.sleep(5)
